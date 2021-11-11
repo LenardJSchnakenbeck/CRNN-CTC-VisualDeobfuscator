@@ -62,12 +62,21 @@ def getTotalMeasurements(data="BrandNewModel/evaluation.csv",column="CRNNLevensh
 
 ###################### Models
 
-def newOCRdeobf(pathToModel, data="data/evaluation.csv", imagename="evalimage",
-                imagepath="data/evalimages/"):  # pathToModel = "bittrashModel-6characters/originalModel"
+def img_to_string_CRNN(imagepath, pathToModel=None):
     from FinalModelCRNN import decode_batch_predictions # still takes some time
     from tensorflow import keras, transpose
     from PIL import Image as PILimage
     import numpy as np
+
+    global model
+
+    if not model:
+        if pathToModel == None: print("pls give pathToModel as secound argument to this function")
+        print("load deobfuscator...")
+        model = keras.models.load_model(pathToModel)
+        prediction_model = keras.models.Model(
+            model.get_layer(name="image").input, model.get_layer(name="dense2").output
+        )
 
     def img_to_vector(imagepath):
         img = PILimage.open(imagepath)
@@ -76,22 +85,18 @@ def newOCRdeobf(pathToModel, data="data/evaluation.csv", imagename="evalimage",
         vector = vector.tolist()
         return vector
 
-    def image_to_string(imagepath):
+    def predict_from_vector(imagepath):
         input = img_to_vector(imagepath=imagepath)
         prediction = prediction_model.predict(np.array([input, ]))
         prediction = decode_batch_predictions(prediction)
         return prediction
 
-    print("deobfuscation by the new model startet")
-    print("load model...")
-    model = keras.models.load_model(pathToModel)
-    prediction_model = keras.models.Model(
-        model.get_layer(name="image").input, model.get_layer(name="dense2").output
-    )
 
-    print("analyse model...")
-    if not (data.endswith(".csv")):
-        data = "data/" + data + ".csv"
+def deobfuscateAndLevenshtein(obfMethod, pathToModel=None, data="data/evaluation.csv", imagename="evalimage",
+                imagepath="data/evalimages/"):  # pathToModel = "bittrashModel-6characters/originalModel"
+
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Users\lenar\AppData\Local\Tesseract-OCR\tesseract.exe"  # r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
     CSV = pd.read_csv(data, encoding="utf_16")
     Deobfuscated = []
     Levenshtein = []
@@ -111,14 +116,40 @@ def newOCRdeobf(pathToModel, data="data/evaluation.csv", imagename="evalimage",
     print(len(CSV["Tweet"]), " Tweets get deobfuscated...")
     for tweet in CSV["Tweet"]:
         if j%100 == 0: print(j,"/",len(CSV["Tweet"]))
-        image = str(imagename + str(j) + ".png")
-        try:
-            deobfuscated_Satz = image_to_string(os.path.join(imagepath, image))[0].lower()     # .strip()
-        except:
-            deobfuscated_Satz = ""
-            print("Deobfuscating image number % eraised an Error, maybe because it has a small width?" % j)
-        deobfuscated_Satz = deobfuscated_Satz.replace("[unk]","") #□                          # "UNK".lower() --> "unk"
-        edits, wrongChars, rawedits = levenshteinAnalysis(deobfuscated_Satz, tweet)
+
+        if obfMethod == "CRNN":
+            csvColumnDeobf = "CRNNDeobf"
+            csvColumnLevenshtein = "CRNNLevenshtein"
+
+            image = os.path.join(imagepath, str(imagename + str(j) + ".png") )
+            try:
+                deobfTweet = img_to_string_CRNN(image, pathToModel)[0].lower()     # .strip()
+            except:
+                deobfTweet = ""
+                print("Deobfuscating image number % eraised an Error, maybe because it has a very small width?" % j)
+            deobfTweet = deobfTweet.replace("[unk]","") #□                          # "UNK".lower() --> "unk"
+
+        elif obfMethod == "pytesseract":
+            csvColumnDeobf="pytesseractDeobf"
+            csvColumnLevenshtein="pytesseractLevenshtein"
+            deobfTweet = pytesseract.img_to_string(os.path.join(imagepath + imagename + str(i) + ".png"),
+                                                   lang="eng").strip()
+            if "\n" in deobfTweet:
+                deobfTweet = deobfTweet.replace("\n", " ") #TODO: maybe we need to strip harder
+
+        elif obfMethod == "normalizer":
+            csvColumnDeobf = "normalizerDeobf"
+            csvColumnLevenshtein = "normalizerLevenshtein"
+
+            obfTweet = CSV["obfuscated_Tweet"][j]
+            deobfTweet = unidecode_expect_nonascii(obfTweet)  # unidecode(obfTweet) #
+            deobfTweet = deobfTweet.replace("[?]", "")
+        else:
+            print("which deobfMethod do you want to use? deobfuscator/pytesseract/normalizer")
+            return
+
+
+        edits, wrongChars, rawedits = levenshteinAnalysis(deobfTweet, tweet)
         distances += edits[0]
         deletions += edits[1]
         insertions += edits[2]
@@ -129,130 +160,27 @@ def newOCRdeobf(pathToModel, data="data/evaluation.csv", imagename="evalimage",
         allEditops += [rawedits]
 
         Levenshtein += [edits]
-        Deobfuscated += [deobfuscated_Satz]
+        Deobfuscated += [deobfTweet]
         j += 1
 
-    CSV["CRNNDeobf"] = Deobfuscated
-    CSV["CRNNLevenshtein"] = Levenshtein
-    #CSV["CRNNtotalNumbers"] = ["dis, del, ins, rep", (distances,deletions,insertions,replacements)]
-    print("dis, del, ins, rep: ", (distances/len(CSV["CRNNDeobf"]), deletions, insertions, replacements))
+    CSV[csvColumnDeobf] = Deobfuscated
+    CSV[csvColumnLevenshtein] = Levenshtein
     CSV.to_csv(data, encoding="utf_16", index=False)
+    print(obfMethod, "/n", "dis, del, ins, rep: ",
+          (distances / len(CSV[csvColumnDeobf]), deletions, insertions, replacements))
     return (distances, deletions, insertions, replacements), (deletedChars, insertedChars, replacedChars), allEditops
 
-# CSV "; Unidecode & LEVENSHTEIN
-def normalizerDeobf(data="evaluation.csv"):
-    if not (data.endswith(".csv")):
-        data = "data/" + data + ".csv"
-    CSV = pd.read_csv(data, encoding="utf_16")
-
-    Deobfuscated = []
-    normalizerLevenshtein = []
-
-    # total numbers, over all tweets
-    deletions = 0
-    replacements = 0
-    insertions = 0
-    distances = 0
-    deletedChars = []
-    insertedChars = []
-    replacedChars = []
-    allEditops = []
-
-    j = 0
-    for obfTweet in CSV["obfuscated_Tweet"]:
-        tweet = CSV["Tweet"][j]
-        deobfTweet = unidecode_expect_nonascii(obfTweet) #unidecode(obfTweet) #
-        deobfTweet = deobfTweet.replace("[?]", "")
-        edits, wrongChars, rawedits = levenshteinAnalysis(deobfTweet, tweet)
-        Deobfuscated += [deobfTweet]
-        distances += edits[0]
-        deletions += edits[1]
-        insertions += edits[2]
-        replacements += edits[3]
-        deletedChars += wrongChars[0]
-        insertedChars += wrongChars[1]
-        replacedChars += wrongChars[2]
-        allEditops += [rawedits]
-
-        normalizerLevenshtein += [edits] #[distance(deobfTweet.lower().strip(), CSV["Tweet"][j].lower())]
-        j += 1
-
-    CSV["normalizerDeobf"] = Deobfuscated
-    CSV["normalizerLevenshtein"] = normalizerLevenshtein
-    CSV.to_csv(data, encoding="utf_16", index=False)
-    return (distances, deletions, insertions, replacements), (deletedChars, insertedChars, replacedChars), allEditops
-
-    # with open(filename, "x", encoding="utf_16") as new_file:
-    #    file_writer = csv.writer(new_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    #    file_writer.writerow(["Tweet", "obfuscated_Tweet", "deobfuscated_Tweet", "Levenshteindistance"])
-    #    i = 0
-    #    distancesunidecode=[]
-    #    for obfTweet in obfTweet_column:
-    #        deobfuscated_Satz = unidecode_expect_nonascii(obfTweet)
-    #        dist = distance(deobfuscated_Satz.lower().strip(), Tweet_column[i].lower())
-    #        distancesunidecode += [dist]
-    #        file_writer.writerow([Tweet_column[i],obfTweet,deobfuscated_Satz, dist])
-    #        i+=1
-    # print("sum distancesunidecode" + str(sum(distancesunidecode)))
-
-def pytessOCRdeobf(data="evaluation.csv", imagename="evalimage", imagepath = "data/evalimages/"):
-    print("tesseract deobfuscation startet")
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Users\lenar\AppData\Local\Tesseract-OCR\tesseract.exe" #r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-    if not (data.endswith(".csv")):
-        data = "data/" + data + ".csv"
-    CSV = pd.read_csv(data, encoding="utf_16")
-    #CSV["obfuscated_Tweet"]
-
-    Deobfuscated = []
-    Levenshtein = []
-
-    # total numbers, over all tweets
-    deletions = 0
-    replacements = 0
-    insertions = 0
-    distances = 0
-    deletedChars = []
-    insertedChars = []
-    replacedChars = []
-    allEditops = []
-
-    i = 0
-    for Tweet in CSV["Tweet"]:
-        if i % 100 == 0: print(i, "/", len(CSV["Tweet"]))
-        deobfTweet = pytesseract.image_to_string(os.path.join(imagepath + imagename + str(i) + ".png"),
-                                                        lang="eng").strip()
-        if "\n" in deobfTweet:
-            deobfTweet = deobfTweet.replace("\n", " ")
-
-        edits, wrongChars, rawedits = levenshteinAnalysis(deobfTweet, Tweet)
-
-        distances += edits[0]
-        deletions += edits[1]
-        insertions += edits[2]
-        replacements += edits[3]
-        deletedChars += wrongChars[0]
-        insertedChars += wrongChars[1]
-        replacedChars += wrongChars[2]
-        allEditops += [rawedits]
-
-        Levenshtein += [edits]
-        Deobfuscated += [deobfTweet]
-
-        i += 1
-
-    CSV["pytesseractDeobf"] = Deobfuscated
-    CSV["pytesseractLevenshtein"] = Levenshtein
-    CSV.to_csv(data, encoding="utf_16", index=False)
-    return (distances, deletions, insertions, replacements), (deletedChars, insertedChars, replacedChars), allEditops
 
 def applyCompareModels(
     imagepath = "C:/Users/Lenard/Downloads/export(3)/BrandNewModel/evalimagesIMGspace/",
     imagename = "evalimage",
     evaluationFile = r"C:\Users\Lenard\Downloads\export(3)\BrandNewModel\evaluationIMGspace.csv",
     evaldata = r"C:\Users\Lenard\Downloads\export(3)\BrandNewModel\dataset_eval.csv"):
+
     # this obfuscates the evaluationdata and creates images
     # CreateEvaluationFile(present_data=evaldata, evaluationFile=evaluationFile,
     #                     imagepath=imagepath, imagename=imagename)
+
     pathToModel = r"C:\Users\Lenard\Downloads\export(3)\BrandNewModel"  # "BrandNewModel/"
     df = pd.read_csv(evaluationFile, encoding="utf_16")
     j = 0
@@ -260,16 +188,18 @@ def applyCompareModels(
         createImage(i, j, imagename, imagepath)
         j += 1
 
-    totalEditsOCR, wrongCharsOCR, editsOCR = newOCRdeobf(pathToModel, data=evaluationFile, imagename=imagename,
+    totalEditsCRNN, wrongCharsCRNN, editsCRNN = deobfuscateAndLevenshtein("CRNN",pathToModel, data=evaluationFile, imagename=imagename,
                                                          imagepath=imagepath)
-    totalEditsNorm, wrongCharsNorm, editsNorm = normalizerDeobf(data=evaluationFile)
-    totalEditsPyTess, wrongCharsPyTess, editsPyTess = pytessOCRdeobf(data=evaluationFile, imagename=imagename,
+    totalEditsNorm, wrongCharsNorm, editsNorm = deobfuscateAndLevenshtein("normalizer",data=evaluationFile)
+    totalEditsPyTess, wrongCharsPyTess, editsPyTess = deobfuscateAndLevenshtein("pytesseract",data=evaluationFile, imagename=imagename,
                                                                      imagepath=imagepath)
 
-    newModelMeasurements = getTotalMeasurements(data=evaluationFile, column="CRNNLevenshtein")
-    normalizerMeasurements = getTotalMeasurements(data=evaluationFile,
-                                                  column="normalizerLevenshtein")  # dist del ins rep
-    pyTessMeasurements = getTotalMeasurements(data=evaluationFile, column="pytesseractLevenshtein")  # dist del ins rep
+    newModelMeasurements = getTotalMeasurements(
+        data=evaluationFile, column="CRNNLevenshtein")
+    normalizerMeasurements = getTotalMeasurements(
+        data=evaluationFile, column="normalizerLevenshtein")
+    pyTessMeasurements = getTotalMeasurements(
+        data=evaluationFile, column="pytesseractLevenshtein")
 
     charCount = 0
     df = pd.read_csv(evaluationFile, encoding="utf_16")
@@ -488,7 +418,7 @@ def hatespeechEval(): #evalfile = "BrandNewModel/evaluationHateSpeech.csv"):
     #    createImage(df["obfuscated_Tweet"][i], i, imagename, imagepath)
 
     CSV["sentences"] = datasetonlysent
-    totalEditsOCR, wrongCharsOCR, error = newOCRdeobf(pathToModel, data=evalfile, imagename=imagename,
+    totalEditsCRNN, wrongCharsCRNN, error = deobfuscateAndLevenshtein("CRNN",pathToModel, data=evalfile, imagename=imagename,
                                                       imagepath=imagepath)
     newModelMeasurements = getTotalMeasurements(data=evalfile, column="CRNNLevenshtein")
 
@@ -532,7 +462,7 @@ def hatespeechEval(): #evalfile = "BrandNewModel/evaluationHateSpeech.csv"):
 
     CSV.to_csv(evalfile, encoding="utf_16")
     with open('BrandNewModel/unknownobf-editcount-wrongchars-error-edits.pkl', 'wb') as f:
-        pickle.dump([totalEditsOCR, wrongCharsOCR, error], f)
+        pickle.dump([totalEditsCRNN, wrongCharsCRNN, error], f)
 
     # this produces a list of the classification before obfuscating, after and after deobfuscating.
     beforeafter = [str(classraw[i][-1][0][0] + classObf[i][-1][0][0] + classDeobf[i][-1][0][0]) for i in

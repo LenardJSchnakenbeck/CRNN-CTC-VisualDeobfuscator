@@ -75,7 +75,7 @@ if __name__ == "__main__":
     )
 
 
-#CTC
+#CTC (https://keras.io/examples/vision/captcha_ocr/)
 class CTCLayer(layers.Layer):
     def __init__(self, name=None):
         super().__init__(name=name)
@@ -100,11 +100,10 @@ class CTCLayer(layers.Layer):
 #MODEL
 def build_model():
     # Inputs to the model
-    input_img = layers.Input(
-        shape=(img_width, img_height, 1), name="image", dtype="float32"
-    )
+    input_img = layers.Input(shape=(img_width, img_height, 1), name="image", dtype="float32")
     masked_img = Masking(mask_value=padding_value)(input_img)
 
+    # For calculating loss via CTC-Layer
     labels = layers.Input(name="labels", shape=(y_train_len_max,), dtype="float32")
     masked_labels = Masking(mask_value=padding_y)(labels)
 
@@ -148,23 +147,8 @@ def build_model():
     rnn = layers.Bidirectional(layers.LSTM(256, return_sequences=True, dropout=0.25))(x)
     rnn = layers.Bidirectional(layers.LSTM(256, return_sequences=True, dropout=0.25), name="lastLSTM")(rnn) #concatenation (default)
 
-    # Output layer (Copied form tf1.x implementation)
+    # Output layer (Copied from tf1.x implementation, where this layer was manually implemented)
     x = layers.Dense(characters+1, activation="softmax", name="dense2")(rnn) # characters + 1
-
-    """logits = tf.reshape(rnn, [-1, 512])
-    W = tf.Variable(
-        tf.random.truncated_normal([512, characters+1], stddev=0.1), name="W"
-    )
-    b = tf.Variable(tf.constant(0.0, shape=[characters+1]), name="b")
-
-    logits = tf.matmul(logits, W) + b
-    logits = tf.reshape(
-        logits, [x.shape[0], max_char_count, characters+1] #[x.shape[0] (batch size), max_char_count, characters+1]
-    )
-
-    # Final layer, the output of the BLSTM
-    logits = tf.transpose(logits, (1, 0, 2))"""
-
 
     # Add CTC layer for calculating CTC loss at each step
     output = CTCLayer(name="ctc_loss")(masked_labels, x)
@@ -211,6 +195,7 @@ if __name__ == "__main__":
         #history = pickle.load(open('/trainHistoryDict', "rb"))
 
     # Get the prediction model by extracting layers till the output layer
+    # (Leaving out the loss calculating CTC-Layer)
     prediction_model = keras.models.Model(
         model.get_layer(name="image").input, model.get_layer(name="lastLSTM").output
     )

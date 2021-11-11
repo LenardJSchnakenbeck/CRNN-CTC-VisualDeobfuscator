@@ -1,12 +1,10 @@
-from Data import Homoglyphs, Leetspeak
-import random, re
+from Substitutes import Homoglyphs, Leetspeak
+import random
 
 
 def obfuscator(text, Choice):      # random: W o r t (W-o-r-t) oder \/\/oR7 oder Wort
-    #re_S = re.compile(r'(\S+)')
-    #tokenized = re_S.split(text)
     obf_string = []
-    #for text in tokenized:
+
     if Choice == -1:
         obf_technique = random.randint(2, 3)  # inklusive der letzten Zahl
     else:
@@ -32,7 +30,6 @@ def Leetobfuscator(string, ObfuscationWahrscheinlichkeit=7):
             obfuscated_sentence += i.upper()  # random.choice([i.upper(),i])
     return obfuscated_sentence
 
-
 def Zwischenzeichenobfuscator(string):
     obfuscated_sentence = ""
     Zwischenzeichenauswahl = " 0123456789.-_＿,｡･､ﾟ￤|￣￭￮𐊅♡:;#'+*~´`\?ß=})]([/{&%$§³\"²!"
@@ -44,7 +41,6 @@ def Zwischenzeichenobfuscator(string):
         else:
             obfuscated_sentence += i + Zwischenzeichen
     return obfuscated_sentence
-
 
 def Einzelzeichenobfuscator(text, ObfuscationWahrscheinlichkeit=4):
     Dictionary = Homoglyphs

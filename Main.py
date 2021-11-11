@@ -1,6 +1,6 @@
 from ImageRender import csv_obf_img
 from DataManager import clearDirectory, SplitData
-from Models import applyCompareModels
+from Evaluation import applyCompareModels
 #import re
 
 data = "data/HASOC_english_dataset/HASOC2019+2020+CONAN-Wordset.csv" # - Kopie.csv"
