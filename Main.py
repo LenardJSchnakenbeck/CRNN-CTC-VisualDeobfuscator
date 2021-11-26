@@ -37,7 +37,7 @@ if __name__ == "__main__":
                             )
 
 # Train Model (takes tons of time and/or computational powerr)
-    #runfile('C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main/FinalModelCRNN.py', wdir='C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main')
+    runfile('C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main/FinalModelCRNN.py', wdir='C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main')
 
 # Apply Models (trained one + baselines)
 #applyCompareModels(imagepath,imagename,csvFile)
