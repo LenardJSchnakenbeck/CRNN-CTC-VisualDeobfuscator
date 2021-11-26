@@ -40,7 +40,7 @@ def createImage(text, namesuffix, name, path):
     filename = os.path.join(path, name + str(namesuffix) + ".png")
     #font = "C:/Users/Lenard/PycharmProjects/Bachelor-Code/unifont-13.0.05.ttf" ################<<<<<<< FONT total PATH
     font = "C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main/unifont-13.0.05.ttf"
-    #font = "/root/.fonts/unifont-13.0.05.ttf"
+    font = "/home/ba/.fonts/unifont-13.0.05.ttf"
     font_size = 21.0 #32.0
 
     # Temporary adding very tall String, to make sure the text in the image will be centered

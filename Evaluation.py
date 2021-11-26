@@ -95,7 +95,7 @@ def img_to_string_CRNN(imagepath, pathToModel=None):
 def deobfuscateAndLevenshtein(obfMethod, pathToModel=None, data="data/evaluation.csv", imagename="evalimage",
                 imagepath="data/evalimages/"):  # pathToModel = "bittrashModel-6characters/originalModel"
 
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Users\lenar\AppData\Local\Tesseract-OCR\tesseract.exe"  # r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    pytesseract.pytesseract.tesseract_cmd = r"/usr/local/Cellar/tesseract/4.1.3/bin/tesseract.exe"
 
     CSV = pd.read_csv(data, encoding="utf_16")
     Deobfuscated = []
