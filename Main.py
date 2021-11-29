@@ -4,7 +4,6 @@ from Evaluation import applyCompareModels
 #import re
 
 data = "data/HASOC_english_dataset/HASOC2019+2020+CONAN-Wordset.csv" # - Kopie.csv"
-data = "data/HASOC_english_dataset/1KB.csv" # - Kopie.csv"
 csvFile = "BrandNewModel/dataset.csv"
 imagepath = "data/images/" # use / in the end pls
 imagename = "image"
@@ -37,7 +36,7 @@ if __name__ == "__main__":
                             )
 
 # Train Model (takes tons of time and/or computational powerr)
-    runfile('C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main/FinalModelCRNN.py', wdir='C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main')
+    #runfile('C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main/FinalModelCRNN.py', wdir='C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main')
 
 # Apply Models (trained one + baselines)
 #applyCompareModels(imagepath,imagename,csvFile)
