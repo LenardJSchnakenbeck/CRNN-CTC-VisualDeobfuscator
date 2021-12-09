@@ -59,9 +59,9 @@ def createImage(text, namesuffix, name, path):
             draw.text(0, height, text)   #variable in Höhe..   #ก้้้้้้้้้้้้้้้้้้้้ #ƒ #S̨̥̫͎̭ͯ̿̔̀ͅ deshalb wird hier einheitliche Höhe festgelegt
             draw(img)
             img.trim()
-            #img.chop(chop, img.height, img.width-chop, img.height) # chop the S̨̥̫͎̭ͯ̿̔̀ͅņ
-            #img.chop(0, 32, 0, -31)  # chop last row of pixels
-            #for 33-1 -> 32
+            img.chop(chop, img.height, img.width-chop, img.height) # chop the S̨̥̫͎̭ͯ̿̔̀ͅņ
+            #img.chop(0, 32, 0, -31)  # chop last row of pixels #for 33-1 -> 32
+
             #img.chop(width=img.width, height=1, x=0, y=1) #funz iwie nicht, aber in Datamanager gelöst
             img.save(filename=filename)
 
