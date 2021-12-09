@@ -10,7 +10,7 @@ imagepath = "data/images/" # use / in the end pls
 imagename = "image"
 #evaluationFile = "BrandNewModel\evaluationIMGspace.csv" == csvFile ?
 
-createImage(" S̨̥̫͎̭ͯ̿̔̀ͅņ",0,"image",imagepath)
+createImage(" S̨̥̫͎̭ͯ̿̔̀ͅņ","-TEST","Bild",imagepath)
 
 
 # create Images & Output csv, clear BrandNewModel-Folder
