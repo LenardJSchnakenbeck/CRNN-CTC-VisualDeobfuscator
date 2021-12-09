@@ -52,12 +52,13 @@ def createImage(text, namesuffix, name, path):
             width = int(draw.get_font_metrics(img_0,text)[4]) #Länge des Strings berechnen
             chop = int(draw.get_font_metrics(img_0,"S̨̥̫͎̭ͯ̿̔̀ͅņ")[4]) #-2
             height = int(draw.get_font_metrics(img_0,text)[5])
+            print("/n/n----------height"+height)
         with Image(width=width, height=height+height//2, background=Color('white')) as img:  #height=height+height//2
             draw.font = font
             draw.font_size = font_size
             draw.text(0, height, text)   #variable in Höhe..   #ก้้้้้้้้้้้้้้้้้้้้ #ƒ #S̨̥̫͎̭ͯ̿̔̀ͅ deshalb wird hier einheitliche Höhe festgelegt
             draw(img)
-            #img.trim()
+            img.trim()
             img.chop(chop, img.height, img.width-chop, img.height) # chop the S̨̥̫͎̭ͯ̿̔̀ͅņ
             img.chop(0, 32, 0, -31)  # chop last row of pixels
             #for 33-1 -> 32
