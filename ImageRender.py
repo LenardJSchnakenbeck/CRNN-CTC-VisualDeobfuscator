@@ -41,7 +41,7 @@ def createImage(text, namesuffix, name, path):
     #font = "C:/Users/Lenard/PycharmProjects/Bachelor-Code/unifont-13.0.05.ttf" ################<<<<<<< FONT total PATH
     font = "C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main/unifont-13.0.05.ttf"
     font = "/home/ba/.fonts/unifont-13.0.05.ttf"
-    font_size = 32.0 #32.0
+    font_size = 32.5 #32.0
 
     # Temporary adding very tall String, to make sure the text in the image will be centered
     text += " S̨̥̫͎̭ͯ̿̔̀ͅņ"
@@ -51,8 +51,8 @@ def createImage(text, namesuffix, name, path):
             draw.font_size = font_size
             width = int(draw.get_font_metrics(img_0,text)[4]) #Länge des Strings berechnen
             chop = int(draw.get_font_metrics(img_0,"S̨̥̫͎̭ͯ̿̔̀ͅņ")[4]) #-2
-            height = 33 #int(draw.get_font_metrics(img_0,text)[5])
-        with Image(width = width, height=height+height//2, background=Color('white')) as img:  #height=height+height//2
+            height = 32 #int(draw.get_font_metrics(img_0,text)[5])
+        with Image(width = width, height=height, background=Color('white')) as img:  #height=height+height//2
             draw.font = font
             draw.font_size = font_size
             draw.text(0,height, text)   #variable in Höhe..   #ก้้้้้้้้้้้้้้้้้้้้ #ƒ #S̨̥̫͎̭ͯ̿̔̀ͅ
