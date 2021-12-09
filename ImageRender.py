@@ -55,10 +55,11 @@ def createImage(text, namesuffix, name, path):
         with Image(width=width, height=height+height//2, background=Color('white')) as img:  #height=height+height//2
             draw.font = font
             draw.font_size = font_size
-            draw.text(0, height, text)   #variable in Höhe..   #ก้้้้้้้้้้้้้้้้้้้้ #ƒ #S̨̥̫͎̭ͯ̿̔̀ͅ deshalb wird hier einheitliche Höhe festgelegt
+            draw.text(0, height, text)   #einheitliche Höhe für text im Bild (unabhängig von Höhe der Buchstaben)
             draw(img)
             img.trim()
             img.chop(chop, img.height, img.width-chop, img.height) # chop the S̨̥̫͎̭ͯ̿̔̀ͅņ
+            img.transform(resize='x32') #in some very rare cases height is not 32px
             #img.chop(0, 32, 0, -31)  # chop last row of pixels #for 33-1 -> 32
 
             #img.chop(width=img.width, height=1, x=0, y=1) #funz iwie nicht, aber in Datamanager gelöst
