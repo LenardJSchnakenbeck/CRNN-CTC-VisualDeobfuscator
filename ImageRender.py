@@ -55,9 +55,9 @@ def createImage(text, namesuffix, name, path):
         with Image(width=width, height=height+height//2, background=Color('white')) as img:  #height=height+height//2
             draw.font = font
             draw.font_size = font_size
-            draw.text(0,height, text)   #variable in Höhe..   #ก้้้้้้้้้้้้้้้้้้้้ #ƒ #S̨̥̫͎̭ͯ̿̔̀ͅ
+            draw.text(0, height, text)   #variable in Höhe..   #ก้้้้้้้้้้้้้้้้้้้้ #ƒ #S̨̥̫͎̭ͯ̿̔̀ͅ deshalb wird hier einheitliche Höhe festgelegt
             draw(img)
-            img.trim()
+            #img.trim()
             img.chop(chop, img.height, img.width-chop, img.height) # chop the S̨̥̫͎̭ͯ̿̔̀ͅņ
             img.chop(0, 32, 0, -31)  # chop last row of pixels
             #for 33-1 -> 32
