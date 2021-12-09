@@ -50,9 +50,8 @@ def createImage(text, namesuffix, name, path):
             draw.font = font
             draw.font_size = font_size
             width = int(draw.get_font_metrics(img_0,text)[4]) #Länge des Strings berechnen
-            chop = int(draw.get_font_metrics(img_0,"S̨̥̫͎̭ͯ̿̔̀ͅņ")[4])
+            chop = int(draw.get_font_metrics(img_0," S̨̥̫͎̭ͯ̿̔̀ͅņ")[4]) - 1
             height = int(draw.get_font_metrics(img_0,text)[5]) #33.0
-            print("/n/n----------height",int(draw.get_font_metrics(img_0," ")[4]))
         with Image(width=width, height=height+height//2, background=Color('white')) as img:  #height=height+height//2
             draw.font = font
             draw.font_size = font_size
