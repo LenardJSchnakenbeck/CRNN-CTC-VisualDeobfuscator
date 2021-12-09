@@ -1,6 +1,7 @@
 from ImageRender import csv_obf_img
 from DataManager import clearDirectory, SplitData
 from Evaluation import applyCompareModels
+from ImageRender import createImage
 #import re
 
 data = "data/HASOC_english_dataset/HASOC2019+2020+CONAN-Wordset.csv" # - Kopie.csv"
@@ -9,18 +10,7 @@ imagepath = "data/images/" # use / in the end pls
 imagename = "image"
 #evaluationFile = "BrandNewModel\evaluationIMGspace.csv" == csvFile ?
 
-
-
-"""try: #Simple Daten, die nur auf meinem PC sind, zum schnelleren testen
-    data = "data/IWG_hatespeech_public-master/test.csv############################._.##############"
-    #data = "data/IWG_hatespeech_public-master/BITTRASH_trash-data.csv"
-    with open(data, "r") as _:
-        pass
-    csvFile = "data/YsoMuchRAM.csv"
-    imagepath = "data/bittrash/"
-    imagename = "image"
-except:
-    pass"""
+createImage(" S̨̥̫͎̭ͯ̿̔̀ͅņ",0,"image",imagepath)
 
 
 # create Images & Output csv, clear BrandNewModel-Folder
