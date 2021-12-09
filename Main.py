@@ -9,8 +9,6 @@ csvFile = "BrandNewModel/dataset.csv"
 imagepath = "data/images/" # use / in the end pls
 imagename = "image"
 #evaluationFile = "BrandNewModel\evaluationIMGspace.csv" == csvFile ?
-for i in "qwertzuiopüäölkjhgfdsayxcvbnmQWERTZUIOPÜÄÖLKJHGFDSAYXCVBNM":
-    createImage("S̨̥̫͎̭ͯ̿̔̀ͅņL"+i,i,"Bild",imagepath+"test/")
 
 
 # create Images & Output csv, clear BrandNewModel-Folder
