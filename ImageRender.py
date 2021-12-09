@@ -41,7 +41,7 @@ def createImage(text, namesuffix, name, path):
     #font = "C:/Users/Lenard/PycharmProjects/Bachelor-Code/unifont-13.0.05.ttf" ################<<<<<<< FONT total PATH
     font = "C:/Users/lenar/Documents/deobfuscator-main/deobfuscator-main/unifont-13.0.05.ttf"
     font = "/home/ba/.fonts/unifont-13.0.05.ttf"
-    font_size = 32.0 #32.0
+    font_size = 31.0 #32.0
 
     # Temporary adding very tall String, to make sure the text in the image will be centered
     text += " S̨̥̫͎̭ͯ̿̔̀ͅņ"
