@@ -60,21 +60,44 @@ def getTotalMeasurements(data="BrandNewModel/evaluation.csv",column="CRNNLevensh
     return (distances/len(CSV[column]), deletions, insertions, replacements)
 
 
-###################### Models
+#====================== Models ========================================================
+pathToModel = r"/Users/lenard/Downloads/BrandNewModel"
+data = r"/Users/lenard/Downloads/BrandNewModel/dataset_eval.csv"
+imagepath = "/Users/lenard/Downloads/images/"
+imagename = "image"
+deobfMethod = "CRNN"
 
-def img_to_string_CRNN(imagepath, pathToModel=None):
-    from FinalModelCRNN import decode_batch_predictions # still takes some time
-    from tensorflow import keras, transpose
-    from PIL import Image as PILimage
-    import numpy as np
+from PIL import Image as PILimage
+import numpy as np
+from DataManager import num_to_char
+from tensorflow import keras, transpose, strings
 
-    global model
+def decode_batch_predictions(pred):
+    max_length = 25 #Length of longest word to predict
+    input_len = np.ones(pred.shape[0]) * pred.shape[1]
+    # Use greedy search. For complex tasks, you can use beam search
+    results = keras.backend.ctc_decode(pred, input_length=input_len, greedy=True)[0][0][
+              # TODO: greedy / beamsearch
+              :, :max_length
+              ]
+    # Iterate over the results and get back the text
+    output_text = []
+    for res in results:
+        res = strings.reduce_join(num_to_char(res)).numpy().decode("utf-8")
+        output_text.append(res)
+    return output_text
 
-    if not model:
+def img_to_string_CRNN(imagepath, pathToModel=None): #"/Users/lenard/Downloads/BrandNewModel/"
+    if 'model' not in globals():
+        global model
+        #from FinalModelCRNN import decode_batch_predictions  # still takes some time
+        from tensorflow import keras
+        from keras import layers
+
         if pathToModel == None: print("pls give pathToModel as secound argument to this function")
         print("load deobfuscator...")
         model = keras.models.load_model(pathToModel)
-        prediction_model = keras.models.Model(
+        model = keras.models.Model(
             model.get_layer(name="image").input, model.get_layer(name="dense2").output
         )
 
@@ -87,15 +110,16 @@ def img_to_string_CRNN(imagepath, pathToModel=None):
 
     def predict_from_vector(imagepath):
         input = img_to_vector(imagepath=imagepath)
-        prediction = prediction_model.predict(np.array([input, ]))
+        prediction = model.predict(np.array([input, ]))
         prediction = decode_batch_predictions(prediction)
         return prediction
+    deobfTweet = predict_from_vector((imagepath))
+    return deobfTweet[0].replace("[UNK]", "") #.lower()
 
-
-def deobfuscateAndLevenshtein(obfMethod, pathToModel=None, data="data/evaluation.csv", imagename="evalimage",
+#deobfuscateAndLevenshtein("CRNN", "/Users/lenard/Downloads/BrandNewModel/", "/Users/lenard/Downloads/BrandNewModel/evaluation.csv", "image", "/Users/lenard/Downloads/evalimages/")
+def deobfuscateAndLevenshtein(deofMethod, pathToModel=None, data="data/evaluation.csv", imagename="evalimage",
                 imagepath="data/evalimages/"):  # pathToModel = "bittrashModel-6characters/originalModel"
-
-    pytesseract.pytesseract.tesseract_cmd = r"/usr/local/Cellar/tesseract/4.1.3/bin/tesseract.exe"
+    pytesseract.pytesseract.tesseract_cmd = "/usr/local/Cellar/tesseract/4.1.3/bin/tesseract.exe"
 
     CSV = pd.read_csv(data, encoding="utf_16")
     Deobfuscated = []
@@ -117,27 +141,28 @@ def deobfuscateAndLevenshtein(obfMethod, pathToModel=None, data="data/evaluation
     for tweet in CSV["Tweet"]:
         if j%100 == 0: print(j,"/",len(CSV["Tweet"]))
 
-        if obfMethod == "CRNN":
+        if deofMethod == "CRNN":
             csvColumnDeobf = "CRNNDeobf"
             csvColumnLevenshtein = "CRNNLevenshtein"
 
             image = os.path.join(imagepath, str(imagename + str(j) + ".png") )
+            deobfTweet = img_to_string_CRNN(image, pathToModel)[0].lower()
             try:
                 deobfTweet = img_to_string_CRNN(image, pathToModel)[0].lower()     # .strip()
             except:
                 deobfTweet = ""
                 print("Deobfuscating image number % eraised an Error, maybe because it has a very small width?" % j)
-            deobfTweet = deobfTweet.replace("[unk]","") #□                          # "UNK".lower() --> "unk"
+            #deobfTweet = deobfTweet.replace("[unk]","") #□                          # "UNK".lower() --> "unk"
 
-        elif obfMethod == "pytesseract":
+        elif deofMethod == "pytesseract":
             csvColumnDeobf="pytesseractDeobf"
             csvColumnLevenshtein="pytesseractLevenshtein"
-            deobfTweet = pytesseract.img_to_string(os.path.join(imagepath + imagename + str(i) + ".png"),
+            deobfTweet = pytesseract.image_to_string(os.path.join(imagepath + imagename + str(j) + ".png"),
                                                    lang="eng").strip()
             if "\n" in deobfTweet:
                 deobfTweet = deobfTweet.replace("\n", " ") #TODO: maybe we need to strip harder
 
-        elif obfMethod == "normalizer":
+        elif deofMethod == "normalizer":
             csvColumnDeobf = "normalizerDeobf"
             csvColumnLevenshtein = "normalizerLevenshtein"
 
@@ -166,7 +191,7 @@ def deobfuscateAndLevenshtein(obfMethod, pathToModel=None, data="data/evaluation
     CSV[csvColumnDeobf] = Deobfuscated
     CSV[csvColumnLevenshtein] = Levenshtein
     CSV.to_csv(data, encoding="utf_16", index=False)
-    print(obfMethod, "/n", "dis, del, ins, rep: ",
+    print(deofMethod, "/n", "dis, del, ins, rep: ",
           (distances / len(CSV[csvColumnDeobf]), deletions, insertions, replacements))
     return (distances, deletions, insertions, replacements), (deletedChars, insertedChars, replacedChars), allEditops
 

@@ -10,6 +10,9 @@ imagepath = "data/images/" # use / in the end pls
 imagename = "image"
 #evaluationFile = "BrandNewModel\evaluationIMGspace.csv" == csvFile ?
 
+#--CREATE EVALIMAGES:
+# imagecount = csv_obf_img("image","BrandNewModel/evaluation.csv","BrandNewModel/dataset_eval.csv", "BrandNewModel/evalimages/",2)
+
 
 # create Images & Output csv, clear BrandNewModel-Folder
 if __name__ == "__main__":

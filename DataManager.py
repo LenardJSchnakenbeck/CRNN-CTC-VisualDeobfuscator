@@ -76,7 +76,6 @@ def ImageToVector(data="text-data-1", directoryname="images/", imagename="image"
     X = []
     y_text = CSV["Tweet"].to_list()
     for i in range(len(y_text)):
-        print(i,"/",len(y_text))
         img = PILimage.open(fp=os.path.join(directoryname + imagename + str(i) + ".png"))
         x = numpy.array(img) / 255.0
         x = numpy.array(transpose(x))
@@ -101,7 +100,6 @@ def ImageToVector(data="text-data-1", directoryname="images/", imagename="image"
         #for j in y_text[i]:
         #    y[i] += [characters.index(j)]
 
-    #TODO: train test split nicht in dieser funktion machen
     #return X, y
     print("X: ",len(X),"Y: ",len(y))
 

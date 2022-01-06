@@ -19,26 +19,28 @@ start_time = time.time()
 #DATA
 #X, y = ImageToVector(True, data=csvFile, directoryname=imagepath, imagename=imagename)
 
-(x_train_unpadded, y_train_unpadded), (x_valid_unpadded, y_valid_unpadded) = ImageToVector(data=csvFile, directoryname=imagepath, imagename=imagename)
-    #train_test_split(X, y,
-    #                                                                                          test_size=0.2,
-    #                                                                                          random_state=42)
-
 modelSaveLocation = "BrandNewModel/"
 batch_size = 32
-epochs = 128
+epochs = 1
 early_stopping_patience = 100 # Rausgenommen
 
+imagepath = "/Users/lenard/Downloads/images/"
+csvFile = "/Users/lenard/Downloads/BrandNewModel/dataset.csv"
+
+(x_train_unpadded, y_train_unpadded), (x_valid_unpadded, y_valid_unpadded) = ImageToVector(data=csvFile, directoryname=imagepath, imagename=imagename)
 labels = y_train_unpadded + y_valid_unpadded
-img_height = 32
-img_width = None
 max_length = max([len(label) for label in labels])
-yflat = reduce(add, y_train_unpadded) + reduce(add, y_valid_unpadded)
-characters = len(characters)
-padding_value = 0.0
-padding_y = 0.0 #characters+1
 
 if __name__ == "__main__":
+
+    img_height = 32
+    img_width = None
+    yflat = reduce(add, y_train_unpadded) + reduce(add, y_valid_unpadded)
+    characters = len(characters)
+    padding_value = 0.0
+    padding_y = 0.0 #characters+1
+
+    print("Okay, lets go")
     x_train = sequence.pad_sequences(x_train_unpadded, value=float(padding_value), dtype='float32',
                                      padding="post", truncating='post')
     x_valid = sequence.pad_sequences(x_valid_unpadded, value=float(padding_value), dtype='float32',
@@ -189,6 +191,9 @@ if __name__ == "__main__":
 
         # Model speichern:
     model.save(modelSaveLocation)
+    #model = keras.models.load_model("/Users/lenard/Downloads/BrandNewModel/")
+
+
     #with open(modelSaveLocation+"/trainHistoryDict", 'wb') as file_pi:
     #    pickle.dump(history.history, file_pi)
         #to load history:
