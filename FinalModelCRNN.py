@@ -21,11 +21,11 @@ start_time = time.time()
 
 modelSaveLocation = "BrandNewModel/"
 batch_size = 32
-epochs = 1
+epochs = 150
 early_stopping_patience = 100 # Rausgenommen
 
-imagepath = "/Users/lenard/Downloads/images/"
-csvFile = "/Users/lenard/Downloads/BrandNewModel/dataset.csv"
+#imagepath = "/Users/lenard/Downloads/images/"
+#csvFile = "/Users/lenard/Downloads/BrandNewModel/dataset.csv"
 
 (x_train_unpadded, y_train_unpadded), (x_valid_unpadded, y_valid_unpadded) = ImageToVector(data=csvFile, directoryname=imagepath, imagename=imagename)
 labels = y_train_unpadded + y_valid_unpadded
