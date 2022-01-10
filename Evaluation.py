@@ -12,6 +12,24 @@ import re
 import matplotlib
 
 
+
+"""FUCK ME
+
+import os
+import pytesseract                                                                                                                                                         
+pathToModel="/Users/lenard/Downloads/BrandNewModel/"
+imagepath= "/Users/lenard/Downloads/evalimages/"
+imagename="image"
+data="/Users/lenard/Downloads/BrandNewModel/evaluation.csv"
+pytesseract.pytesseract.tesseract_cmd = "/usr/local/Cellar/tesseract/4.1.3/bin/tesseract"
+TESSDATA_PREFIX = "/usr/local/Cellar/tesseract/4.1.3/share/"
+deobfTweet = pytesseract.image_to_string(os.path.join(imagepath + imagename + str(14) + ".png")).strip()
+deobfTweet 
+
+
+"""
+
+
 def CreateEvaluationFile(present_data="BrandNewModel/dataset_eval.csv", evaluationFile="BrandNewModel/evaluation.csv",
                          imagepath="data/evalimages", imagename="evalimage"):
     CheckFileExist(evaluationFile)
@@ -67,6 +85,7 @@ imagepath = "/Users/lenard/Downloads/images/"
 imagename = "image"
 deobfMethod = "CRNN"
 
+#for CRNN deobfuscation
 from PIL import Image as PILimage
 import numpy as np
 from DataManager import num_to_char
@@ -116,10 +135,15 @@ def img_to_string_CRNN(imagepath, pathToModel=None): #"/Users/lenard/Downloads/B
     deobfTweet = predict_from_vector((imagepath))
     return deobfTweet[0].replace("[UNK]", "") #.lower()
 
+#exec(open("filename.py").read())
+
 #deobfuscateAndLevenshtein("CRNN", "/Users/lenard/Downloads/BrandNewModel/", "/Users/lenard/Downloads/BrandNewModel/evaluation.csv", "image", "/Users/lenard/Downloads/evalimages/")
 def deobfuscateAndLevenshtein(deofMethod, pathToModel=None, data="data/evaluation.csv", imagename="evalimage",
                 imagepath="data/evalimages/"):  # pathToModel = "bittrashModel-6characters/originalModel"
-    pytesseract.pytesseract.tesseract_cmd = "home/ba/miniconda3/envs/deobf/bin/tesseract.exe" # "/usr/local/Cellar/tesseract/4.1.3/bin/tesseract.exe"
+    pytesseract.pytesseract.tesseract_cmd = "/usr/local/Cellar/tesseract/4.1.3/bin/tesseract"#.exe"# "home/ba/miniconda3/envs/deobf/bin/tesseract.exe" # "/usr/local/Cellar/tesseract/4.1.3/bin/tesseract.exe"
+    TESSDATA_PREFIX = "/usr/local/Cellar/tesseract/4.1.3/share/tessdata/"
+    os.environ["TESSDATA_PREFIX"] = TESSDATA_PREFIX
+    #os.environ.get('TESSDATA_PREFIX')
 
     CSV = pd.read_csv(data, encoding="utf_16")
     Deobfuscated = []
@@ -160,7 +184,7 @@ def deobfuscateAndLevenshtein(deofMethod, pathToModel=None, data="data/evaluatio
             deobfTweet = pytesseract.image_to_string(os.path.join(imagepath + imagename + str(j) + ".png"),
                                                    lang="eng").strip()
             if "\n" in deobfTweet:
-                deobfTweet = deobfTweet.replace("\n", " ") #TODO: maybe we need to strip harder
+                deobfTweet = deobfTweet.replace("\n", "") #TODO: maybe we need to strip harder
 
         elif deofMethod == "normalizer":
             csvColumnDeobf = "normalizerDeobf"
@@ -290,7 +314,7 @@ def CharDistribution():
     return freq
 
 # ? Edit-Operations per Model ?
-def plotOperations(normalizerMeasurements, pyTessMeasurements, newModelMeasurements, oldModelMeasurements):
+def plotOperations(data = "/Users/lenard/Downloads/BrandNewModel/evaluation.csv"): #normalizerMeasurements, pyTessMeasurements, newModelMeasurements, oldModelMeasurements):
     #evaluationFile = r"C:\Users\Lenard\Downloads\export(3)\BrandNewModel\evaluationN-oldImageRender.csv"
     #oldModelMeasurements = getTotalMeasurements(data=evaluationFile, column="CRNNLevenshtein")
     #evaluationFile = r"C:\Users\Lenard\Downloads\export(3)\BrandNewModel\evaluationN.csv"
@@ -299,13 +323,18 @@ def plotOperations(normalizerMeasurements, pyTessMeasurements, newModelMeasureme
     #                                              column="normalizerLevenshtein")  # dist del ins rep
     #pyTessMeasurements = getTotalMeasurements(data=evaluationFile, column="pytesseractLevenshtein")
 
+    CRNNMeasurements = getTotalMeasurements(data, column="CRNNLevenshtein")
+    pytesseractMeasurements = getTotalMeasurements(data, column="pytesseractLevenshtein")
+    normalizerMeasurements = getTotalMeasurements(data, column="normalizerLevenshtein")
+
+
     import matplotlib.pyplot as plt
     import numpy as np
 
     labels = ['Normalizer', 'PyTesseract OCR', 'proposed Model']#, 'proposed Model\n(images with space)']
-    deletions = [normalizerMeasurements[1], pyTessMeasurements[1], newModelMeasurements[1]]#oldModelMeasurements[1]]#, 21]
-    insertions = [normalizerMeasurements[2], pyTessMeasurements[2], newModelMeasurements[2]]#oldModelMeasurements[2]]#,
-    replacements = [normalizerMeasurements[3], pyTessMeasurements[3], newModelMeasurements[3]]#oldModelMeasurements[3]]#,
+    deletions = [normalizerMeasurements[1], pytesseractMeasurements[1], CRNNMeasurements[1]]#oldModelMeasurements[1]]#, 21]
+    insertions = [normalizerMeasurements[2], pytesseractMeasurements[2], CRNNMeasurements[2]]#oldModelMeasurements[2]]#,
+    replacements = [normalizerMeasurements[3], pytesseractMeasurements[3], CRNNMeasurements[3]]#oldModelMeasurements[3]]#,
 
     x = np.arange(len(labels))  # the label locations
     width = 0.3  # the width of the bars
